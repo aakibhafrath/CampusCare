@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}My Tasks{% endblock %}
+{% block nav_tasks %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title"><i class="bi bi-tools me-2 text-primary"></i>My Tasks</div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-sm-5">{{ filter_form.search }}</div>
+    <div class="col-sm-3">{{ filter_form.status }}</div>
+    <div class="col-sm-3">{{ filter_form.category }}</div>
+    <div class="col-sm-1"><button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-search"></i></button></div>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    {% if page_obj.object_list %}
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>#</th><th>Title</th><th>Student</th><th>Category</th><th>Location</th><th>Status</th><th>Assigned</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for task in page_obj %}
+        <tr>
+          <td class="text-muted">#{{ task.pk }}</td>
+          <td><a href="{% url 'complaints:complaint_detail' task.pk %}" class="text-decoration-none fw-semibold text-dark">{{ task.title|truncatechars:30 }}</a></td>
+          <td>{{ task.student.get_full_name|default:task.student.username }}</td>
+          <td><span class="category-badge">{{ task.get_category_display }}</span></td>
+          <td>{{ task.location }}</td>
+          <td><span class="badge status-badge-{{ task.status }}">{{ task.get_status_display }}</span></td>
+          <td class="text-muted small">{{ task.updated_at|date:"M d, Y" }}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'complaints:complaint_detail' task.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+              {% if task.status == 'assigned' or task.status == 'in_progress' %}
+              <a href="{% url 'complaints:update_status' task.pk %}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon"><i class="bi bi-tools"></i></div>
+      <div class="empty-state-title">No tasks found</div>
+      <div class="empty-state-text">No tasks have been assigned to you yet.</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

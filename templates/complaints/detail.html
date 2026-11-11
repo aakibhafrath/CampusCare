@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% block title %}Complaint #{{ complaint.pk }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title">
+    <i class="bi bi-clipboard-check me-2 text-primary"></i>Complaint #{{ complaint.pk }}
+  </div>
+  <div class="d-flex gap-2">
+    {% if user.is_student %}
+    <a href="{% url 'complaints:my_complaints' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+    {% elif user.is_administrator %}
+    <a href="{% url 'complaints:all_complaints' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>All Complaints
+    </a>
+    {% if complaint.status == 'submitted' %}
+    <a href="{% url 'complaints:assign_technician' complaint.pk %}" class="btn btn-warning">
+      <i class="bi bi-person-plus me-2"></i>Assign Technician
+    </a>
+    {% elif complaint.status == 'resolved' %}
+    <a href="{% url 'complaints:close_complaint' complaint.pk %}" class="btn btn-dark">
+      <i class="bi bi-lock me-2"></i>Close Complaint
+    </a>
+    {% endif %}
+    {% elif user.is_technician %}
+    <a href="{% url 'complaints:my_tasks' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>My Tasks
+    </a>
+    {% if complaint.status in 'assigned,in_progress' %}
+    <a href="{% url 'complaints:update_status' complaint.pk %}" class="btn btn-warning">
+      <i class="bi bi-pencil me-2"></i>Update Status
+    </a>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Complaint Info -->
+  <div class="col-lg-8">
+    <div class="card mb-4">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-info-circle me-2"></i>Complaint Details</span>
+        <span class="badge status-badge-{{ complaint.status }} fs-6">{{ complaint.get_status_display }}</span>
+      </div>
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">{{ complaint.title }}</h5>
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6">
+            <div class="detail-label">Category</div>
+            <div class="detail-value"><i class="bi {{ complaint.category_icon }} me-1 text-primary"></i>{{ complaint.get_category_display }}</div>
+          </div>
+          <div class="col-sm-6">
+            <div class="detail-label">Location</div>
+            <div class="detail-value"><i class="bi bi-geo-alt me-1 text-primary"></i>{{ complaint.location }}</div>
+          </div>
+          <div class="col-sm-6">
+            <div class="detail-label">Submitted By</div>
+            <div class="detail-value"><i class="bi bi-person me-1 text-primary"></i>{{ complaint.student.get_full_name|default:complaint.student.username }}</div>
+          </div>
+          <div class="col-sm-6">
+            <div class="detail-label">Assigned Technician</div>
+            <div class="detail-value">
+              {% if complaint.assigned_technician %}
+              <i class="bi bi-tools me-1 text-primary"></i>{{ complaint.assigned_technician.get_full_name|default:complaint.assigned_technician.username }}
+              {% else %}
+              <span class="text-muted">Not assigned yet</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="detail-label">Submitted On</div>
+            <div class="detail-value">{{ complaint.created_at|date:"M d, Y H:i" }}</div>
+          </div>
+          <div class="col-sm-6">
+            <div class="detail-label">Last Updated</div>
+            <div class="detail-value">{{ complaint.updated_at|date:"M d, Y H:i" }}</div>
+          </div>
+        </div>
+        <div>
+          <div class="detail-label mb-2">Description</div>
+          <div class="p-3 rounded-3" style="background:#f8f9fa;white-space:pre-line;">{{ complaint.description }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status History -->
+    <div class="card">
+      <div class="card-header"><i class="bi bi-clock-history me-2"></i>Status History</div>
+      <div class="card-body p-4">
+        {% if history %}
+        <div class="timeline">
+          {% for h in history %}
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <div>
+                  {% if h.old_status %}
+                  <span class="badge status-badge-{{ h.old_status }}">{{ h.get_old_status_display }}</span>
+                  <i class="bi bi-arrow-right mx-2 text-muted"></i>
+                  {% endif %}
+                  <span class="badge status-badge-{{ h.new_status }}">{{ h.get_new_status_display }}</span>
+                </div>
+                <div class="timeline-time">{{ h.changed_at|date:"M d, Y H:i" }}</div>
+              </div>
+              {% if h.changed_by %}
+              <div class="text-muted small mb-1">
+                <i class="bi bi-person me-1"></i>By: {{ h.changed_by.get_full_name|default:h.changed_by.username }}
+              </div>
+              {% endif %}
+              {% if h.notes %}
+              <div class="small text-muted"><i class="bi bi-chat-text me-1"></i>{{ h.notes }}</div>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-muted text-center py-3">No status history available.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions Sidebar -->
+  <div class="col-lg-4">
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-lightning me-2"></i>Quick Actions</div>
+      <div class="card-body">
+        {% if user.is_administrator %}
+          {% if complaint.status == 'submitted' %}
+          <a href="{% url 'complaints:assign_technician' complaint.pk %}" class="btn btn-warning w-100 mb-2">
+            <i class="bi bi-person-plus me-2"></i>Assign Technician
+          </a>
+          {% elif complaint.status == 'resolved' %}
+          <a href="{% url 'complaints:close_complaint' complaint.pk %}" class="btn btn-dark w-100 mb-2">
+            <i class="bi bi-lock me-2"></i>Close Complaint
+          </a>
+          {% endif %}
+        {% elif user.is_technician %}
+          {% if complaint.status == 'assigned' %}
+          <a href="{% url 'complaints:update_status' complaint.pk %}" class="btn btn-warning w-100 mb-2">
+            <i class="bi bi-play-circle me-2"></i>Mark In Progress
+          </a>
+          {% elif complaint.status == 'in_progress' %}
+          <a href="{% url 'complaints:update_status' complaint.pk %}" class="btn btn-success w-100 mb-2">
+            <i class="bi bi-check2-circle me-2"></i>Mark Resolved
+          </a>
+          {% endif %}
+        {% elif user.is_student %}
+          <a href="{% url 'complaints:submit_complaint' %}" class="btn btn-primary w-100 mb-2">
+            <i class="bi bi-plus-circle me-2"></i>New Complaint
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Status Progress -->
+    <div class="card">
+      <div class="card-header"><i class="bi bi-graph-up me-2"></i>Progress</div>
+      <div class="card-body">
+        <div class="d-flex flex-column gap-2">
+          {% for s, label in complaint.STATUS_CHOICES %}
+          <div class="d-flex align-items-center gap-2">
+            <div style="width:20px;height:20px;border-radius:50%;flex-shrink:0;
+              background:{% if complaint.status == s %}var(--primary){% elif s == 'submitted' and complaint.status != 'submitted' %}#10b981{% elif s == 'assigned' and complaint.status in 'in_progress,resolved,closed' %}#10b981{% elif s == 'in_progress' and complaint.status in 'resolved,closed' %}#10b981{% elif s == 'resolved' and complaint.status == 'closed' %}#10b981{% else %}#e9ecef{% endif %};
+              display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-check text-white" style="font-size:0.65rem;"></i>
+            </div>
+            <span class="small {% if complaint.status == s %}fw-bold text-primary{% else %}text-muted{% endif %}">
+              {{ label }}
+            </span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

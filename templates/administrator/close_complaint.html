@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Close Complaint{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title"><i class="bi bi-lock me-2 text-dark"></i>Close Complaint #{{ complaint.pk }}</div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-info-circle me-2"></i>Confirm Close</div>
+      <div class="card-body">
+        <div class="p-3 rounded-3 mb-4" style="background:#fff3cd;border:1px solid #ffc107;">
+          <div class="fw-semibold">{{ complaint.title }}</div>
+          <div class="text-muted small mt-1">{{ complaint.location }} &bull; {{ complaint.get_category_display }}</div>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-4">
+            <label class="form-label">Closing Notes (optional)</label>
+            <textarea name="notes" class="form-control" rows="3" placeholder="Add any closing remarks..."></textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-dark">
+              <i class="bi bi-lock me-2"></i>Confirm Close
+            </button>
+            <a href="{% url 'complaints:complaint_detail' complaint.pk %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

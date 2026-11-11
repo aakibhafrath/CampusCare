@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% block title %}Reports & Analytics{% endblock %}
+{% block nav_reports %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+.report-stat { text-align:center; padding:20px; }
+.report-stat-value { font-size:2.5rem; font-weight:700; color:var(--primary); }
+.report-stat-label { font-size:0.85rem; color:var(--text-muted); font-weight:500; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title"><i class="bi bi-bar-chart me-2 text-primary"></i>Reports & Analytics</div>
+</div>
+
+<!-- Overview Stats -->
+<div class="row g-4 mb-4">
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="report-stat">
+        <div class="report-stat-value">{{ total_complaints }}</div>
+        <div class="report-stat-label">Total Complaints</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="report-stat">
+        <div class="report-stat-value" style="color:#10b981;">{{ resolved_complaints }}</div>
+        <div class="report-stat-label">Resolved / Closed</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="report-stat">
+        <div class="report-stat-value" style="color:#f59e0b;">{{ resolution_rate }}%</div>
+        <div class="report-stat-label">Resolution Rate</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-3">
+    <div class="card">
+      <div class="report-stat">
+        <div class="report-stat-value" style="color:#0ea5e9;">{{ total_technicians }}</div>
+        <div class="report-stat-label">Active Technicians</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-pie-chart me-2"></i>Complaints by Status</div>
+      <div class="card-body">
+        <div class="chart-container"><canvas id="statusChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-bar-chart me-2"></i>Complaints by Category</div>
+      <div class="card-body">
+        <div class="chart-container"><canvas id="categoryChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status Breakdown Table -->
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-table me-2"></i>Status Breakdown</div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead><tr><th>Status</th><th>Count</th><th>Percentage</th></tr></thead>
+          <tbody>
+            {% for key, data in status_data.items %}
+            <tr>
+              <td><span class="badge status-badge-{{ key }}">{{ data.label }}</span></td>
+              <td class="fw-bold">{{ data.count }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress flex-grow-1" style="height:6px;">
+                    <div class="progress-bar bg-primary" style="width:{% if total_complaints %}{% widthratio data.count total_complaints 100 %}{% else %}0{% endif %}%"></div>
+                  </div>
+                  <span class="small text-muted">{% if total_complaints %}{% widthratio data.count total_complaints 100 %}{% else %}0{% endif %}%</span>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-table me-2"></i>Category Breakdown</div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead><tr><th>Category</th><th>Count</th><th>Percentage</th></tr></thead>
+          <tbody>
+            {% for key, data in category_data.items %}
+            <tr>
+              <td><span class="category-badge">{{ data.label }}</span></td>
+              <td class="fw-bold">{{ data.count }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress flex-grow-1" style="height:6px;">
+                    <div class="progress-bar bg-primary" style="width:{% if total_complaints %}{% widthratio data.count total_complaints 100 %}{% else %}0{% endif %}%"></div>
+                  </div>
+                  <span class="small text-muted">{% if total_complaints %}{% widthratio data.count total_complaints 100 %}{% else %}0{% endif %}%</span>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Technician Performance -->
+<div class="card">
+  <div class="card-header"><i class="bi bi-people me-2"></i>Technician Performance</div>
+  <div class="card-body p-0">
+    {% if technician_data %}
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>Technician</th><th>Total Assigned</th><th>In Progress</th><th>Resolved</th><th>Closed</th></tr>
+      </thead>
+      <tbody>
+        {% for item in technician_data %}
+        <tr>
+          <td class="fw-semibold">{{ item.technician.get_full_name|default:item.technician.username }}</td>
+          <td><span class="badge bg-primary">{{ item.total }}</span></td>
+          <td><span class="badge status-badge-in_progress">{{ item.in_progress }}</span></td>
+          <td><span class="badge status-badge-resolved">{{ item.resolved }}</span></td>
+          <td><span class="badge status-badge-closed">{{ item.closed }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon"><i class="bi bi-people"></i></div>
+      <div class="empty-state-title">No technician data</div>
+      <div class="empty-state-text">No technicians are registered yet.</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const statusLabels = {{ status_chart_labels|safe }};
+const statusValues = {{ status_chart_values|safe }};
+const categoryLabels = {{ category_chart_labels|safe }};
+const categoryValues = {{ category_chart_values|safe }};
+
+const chartColors = ['#64748b','#3b82f6','#f59e0b','#10b981','#374151'];
+const catColors = ['#f59e0b','#8b5cf6','#3b82f6','#06b6d4','#ef4444','#6b7280'];
+
+// Status Doughnut Chart
+new Chart(document.getElementById('statusChart'), {
+  type: 'doughnut',
+  data: {
+    labels: statusLabels,
+    datasets: [{ data: statusValues, backgroundColor: chartColors, borderWidth: 2, borderColor: '#fff' }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+
+// Category Bar Chart
+new Chart(document.getElementById('categoryChart'), {
+  type: 'bar',
+  data: {
+    labels: categoryLabels,
+    datasets: [{
+      label: 'Complaints',
+      data: categoryValues,
+      backgroundColor: catColors,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+  }
+});
+</script>
+{% endblock %}

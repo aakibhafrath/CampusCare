@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Assign Technician{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title"><i class="bi bi-person-plus me-2 text-primary"></i>Assign Technician</div>
+  <a href="{% url 'complaints:all_complaints' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>Back
+  </a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card mb-4">
+      <div class="card-header"><i class="bi bi-info-circle me-2"></i>Complaint Details</div>
+      <div class="card-body">
+        <h6 class="fw-bold">{{ complaint.title }}</h6>
+        <div class="row g-2 mt-2">
+          <div class="col-6"><div class="detail-label">Category</div><div class="detail-value">{{ complaint.get_category_display }}</div></div>
+          <div class="col-6"><div class="detail-label">Location</div><div class="detail-value">{{ complaint.location }}</div></div>
+          <div class="col-6"><div class="detail-label">Status</div><div><span class="badge status-badge-{{ complaint.status }}">{{ complaint.get_status_display }}</span></div></div>
+          <div class="col-6"><div class="detail-label">Student</div><div class="detail-value">{{ complaint.student.get_full_name|default:complaint.student.username }}</div></div>
+          <div class="col-12"><div class="detail-label">Description</div><div class="detail-value small text-muted">{{ complaint.description|truncatechars:200 }}</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-person-check me-2"></i>Select Technician</div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Technician <span class="text-danger">*</span></label>
+            {{ form.technician }}
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Assignment Notes</label>
+            {{ form.notes }}
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-warning">
+              <i class="bi bi-person-check me-2"></i>Assign Technician
+            </button>
+            <a href="{% url 'complaints:complaint_detail' complaint.pk %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

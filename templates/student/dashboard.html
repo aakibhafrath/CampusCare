@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}Student Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title">
+    <i class="bi bi-speedometer2 me-2 text-primary"></i>Welcome, {{ user.first_name|default:user.username }}!
+  </div>
+  <a href="{% url 'complaints:submit_complaint' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-2"></i>New Complaint
+  </a>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-4 mb-4">
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card primary">
+      <div class="stat-card-icon"><i class="bi bi-clipboard-data"></i></div>
+      <div>
+        <div class="stat-card-value">{{ stats.total }}</div>
+        <div class="stat-card-label">Total Complaints</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card secondary">
+      <div class="stat-card-icon"><i class="bi bi-send"></i></div>
+      <div>
+        <div class="stat-card-value">{{ stats.submitted }}</div>
+        <div class="stat-card-label">Submitted</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card info">
+      <div class="stat-card-icon"><i class="bi bi-person-check"></i></div>
+      <div>
+        <div class="stat-card-value">{{ stats.assigned }}</div>
+        <div class="stat-card-label">Assigned</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card warning">
+      <div class="stat-card-icon"><i class="bi bi-tools"></i></div>
+      <div>
+        <div class="stat-card-value">{{ stats.in_progress }}</div>
+        <div class="stat-card-label">In Progress</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card success">
+      <div class="stat-card-icon"><i class="bi bi-check-circle"></i></div>
+      <div>
+        <div class="stat-card-value">{{ stats.resolved }}</div>
+        <div class="stat-card-label">Resolved</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card dark">
+      <div class="stat-card-icon"><i class="bi bi-lock"></i></div>
+      <div>
+        <div class="stat-card-value">{{ stats.closed }}</div>
+        <div class="stat-card-label">Closed</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Complaints -->
+<div class="card">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <span><i class="bi bi-clock-history me-2"></i>Recent Complaints</span>
+    <a href="{% url 'complaints:my_complaints' %}" class="btn btn-sm btn-outline-primary">View All</a>
+  </div>
+  <div class="card-body p-0">
+    {% if recent_complaints %}
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>#</th><th>Title</th><th>Category</th><th>Location</th><th>Status</th><th>Date</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for c in recent_complaints %}
+        <tr>
+          <td class="text-muted">#{{ c.pk }}</td>
+          <td class="fw-semibold">{{ c.title }}</td>
+          <td><span class="category-badge">{{ c.get_category_display }}</span></td>
+          <td>{{ c.location }}</td>
+          <td>
+            <span class="badge status-badge-{{ c.status }}">{{ c.get_status_display }}</span>
+          </td>
+          <td class="text-muted small">{{ c.created_at|date:"M d, Y" }}</td>
+          <td>
+            <a href="{% url 'complaints:complaint_detail' c.pk %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon"><i class="bi bi-clipboard-x"></i></div>
+      <div class="empty-state-title">No complaints yet</div>
+      <div class="empty-state-text">Submit your first complaint to get started.</div>
+      <a href="{% url 'complaints:submit_complaint' %}" class="btn btn-primary mt-3">
+        <i class="bi bi-plus-circle me-2"></i>Submit Complaint
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

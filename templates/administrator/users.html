@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Manage Users{% endblock %}
+{% block nav_users %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title"><i class="bi bi-people me-2 text-primary"></i>Manage Users</div>
+</div>
+
+<ul class="nav nav-tabs mb-4" id="usersTab">
+  <li class="nav-item">
+    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#students">
+      <i class="bi bi-mortarboard me-1"></i>Students ({{ students.count }})
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#technicians">
+      <i class="bi bi-tools me-1"></i>Technicians ({{ technicians.count }})
+    </button>
+  </li>
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane fade show active" id="students">
+    <div class="table-card">
+      <table class="table table-hover">
+        <thead>
+          <tr><th>#</th><th>Name</th><th>Username</th><th>Email</th><th>Student ID</th><th>Department</th><th>Joined</th></tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td><strong>{{ student.get_full_name|default:student.username }}</strong></td>
+            <td>{{ student.username }}</td>
+            <td>{{ student.email|default:"—" }}</td>
+            <td>{{ student.student_id|default:"—" }}</td>
+            <td>{{ student.department|default:"—" }}</td>
+            <td>{{ student.created_at|date:"M d, Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="text-center py-4 text-muted">No students registered yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="technicians">
+    <div class="table-card">
+      <table class="table table-hover">
+        <thead>
+          <tr><th>#</th><th>Name</th><th>Username</th><th>Email</th><th>Phone</th><th>Joined</th></tr>
+        </thead>
+        <tbody>
+          {% for tech in technicians %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td><strong>{{ tech.get_full_name|default:tech.username }}</strong></td>
+            <td>{{ tech.username }}</td>
+            <td>{{ tech.email|default:"—" }}</td>
+            <td>{{ tech.phone_number|default:"—" }}</td>
+            <td>{{ tech.created_at|date:"M d, Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-center py-4 text-muted">No technicians registered yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Register{% endblock %}
+
+{% block auth_content %}
+<div class="auth-wrapper" style="padding: 30px 20px;">
+  <div class="auth-card" style="max-width: 540px;">
+    <div class="auth-header">
+      <div class="auth-logo"><i class="bi bi-person-plus"></i></div>
+      <div class="auth-title">Student Registration</div>
+      <div class="auth-subtitle">Create your CampusCare account</div>
+    </div>
+    <div class="auth-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">First Name *</label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors.as_text }}</div>{% endif %}
+          </div>
+          <div class="col-6">
+            <label class="form-label">Last Name *</label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}<div class="text-danger small">{{ form.last_name.errors.as_text }}</div>{% endif %}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Username *</label>
+            {{ form.username }}
+            {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.as_text }}</div>{% endif %}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Email Address *</label>
+            {{ form.email }}
+            {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.as_text }}</div>{% endif %}
+          </div>
+          <div class="col-6">
+            <label class="form-label">Student ID</label>
+            {{ form.student_id }}
+          </div>
+          <div class="col-6">
+            <label class="form-label">Phone Number</label>
+            {{ form.phone_number }}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Department</label>
+            {{ form.department }}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Password *</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}<div class="text-danger small">{{ form.password1.errors.as_text }}</div>{% endif %}
+          </div>
+          <div class="col-12">
+            <label class="form-label">Confirm Password *</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}<div class="text-danger small">{{ form.password2.errors.as_text }}</div>{% endif %}
+          </div>
+        </div>
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger mt-3 py-2 small">{{ form.non_field_errors.as_text }}</div>
+        {% endif %}
+        <div class="d-grid mt-4">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-person-check me-2"></i>Create Account
+          </button>
+        </div>
+      </form>
+      <hr class="my-4">
+      <div class="text-center">
+        <a href="{% url 'accounts:login' %}" class="text-muted small">
+          <i class="bi bi-arrow-left me-1"></i>Already have an account? Sign In
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

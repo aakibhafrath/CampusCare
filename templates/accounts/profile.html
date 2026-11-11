@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block nav_profile %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title"><i class="bi bi-person-circle me-2 text-primary"></i>My Profile</div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card text-center p-4">
+      <div class="mb-3">
+        {% if user.profile_picture %}
+          <img src="{{ user.profile_picture.url }}" class="rounded-circle" width="100" height="100" style="object-fit:cover;">
+        {% else %}
+          <div class="avatar-placeholder mx-auto" style="width:80px;height:80px;font-size:1.8rem;background:var(--primary);">
+            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+          </div>
+        {% endif %}
+      </div>
+      <h5 class="fw-bold">{{ user.get_full_name|default:user.username }}</h5>
+      <span class="badge bg-primary">{{ user.get_role_display_name }}</span>
+      <hr>
+      <div class="text-start">
+        <div class="mb-2"><div class="detail-label">Username</div><div class="detail-value">{{ user.username }}</div></div>
+        <div class="mb-2"><div class="detail-label">Email</div><div class="detail-value">{{ user.email|default:"—" }}</div></div>
+        {% if user.is_student %}
+        <div class="mb-2"><div class="detail-label">Student ID</div><div class="detail-value">{{ user.student_id|default:"—" }}</div></div>
+        <div class="mb-2"><div class="detail-label">Department</div><div class="detail-value">{{ user.department|default:"—" }}</div></div>
+        {% endif %}
+        <div class="mb-2"><div class="detail-label">Phone</div><div class="detail-value">{{ user.phone_number|default:"—" }}</div></div>
+        <div><div class="detail-label">Member Since</div><div class="detail-value">{{ user.created_at|date:"M d, Y" }}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-pencil-square me-2"></i>Edit Profile
+      </div>
+      <div class="card-body p-4">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="form-label">First Name</label>
+              {{ form.first_name }}
+            </div>
+            <div class="col-6">
+              <label class="form-label">Last Name</label>
+              {{ form.last_name }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Email Address</label>
+              {{ form.email }}
+            </div>
+            <div class="col-6">
+              <label class="form-label">Phone Number</label>
+              {{ form.phone_number }}
+            </div>
+            {% if user.is_student %}
+            <div class="col-6">
+              <label class="form-label">Student ID</label>
+              {{ form.student_id }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Department</label>
+              {{ form.department }}
+            </div>
+            {% endif %}
+            <div class="col-12">
+              <label class="form-label">Profile Picture</label>
+              {{ form.profile_picture }}
+            </div>
+          </div>
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check2 me-2"></i>Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

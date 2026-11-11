@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block nav_admin_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title">
+    <i class="bi bi-speedometer2 me-2 text-primary"></i>Administrator Dashboard
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'complaints:waiting_for_assignment' %}" class="btn btn-warning">
+      <i class="bi bi-clock-history me-2"></i>Assign Tasks
+      {% if stats.waiting > 0 %}<span class="badge bg-dark ms-1">{{ stats.waiting }}</span>{% endif %}
+    </a>
+    <a href="{% url 'reports:dashboard' %}" class="btn btn-outline-primary">
+      <i class="bi bi-bar-chart me-2"></i>Reports
+    </a>
+  </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-lg-4">
+    <div class="stat-card primary">
+      <div class="stat-card-icon"><i class="bi bi-clipboard-data"></i></div>
+      <div><div class="stat-card-value">{{ stats.total }}</div><div class="stat-card-label">Total Complaints</div></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="stat-card danger">
+      <div class="stat-card-icon"><i class="bi bi-clock-history"></i></div>
+      <div><div class="stat-card-value">{{ stats.waiting }}</div><div class="stat-card-label">Waiting Assignment</div></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="stat-card info">
+      <div class="stat-card-icon"><i class="bi bi-person-check"></i></div>
+      <div><div class="stat-card-value">{{ stats.assigned }}</div><div class="stat-card-label">Assigned</div></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="stat-card warning">
+      <div class="stat-card-icon"><i class="bi bi-tools"></i></div>
+      <div><div class="stat-card-value">{{ stats.in_progress }}</div><div class="stat-card-label">In Progress</div></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="stat-card success">
+      <div class="stat-card-icon"><i class="bi bi-check-circle"></i></div>
+      <div><div class="stat-card-value">{{ stats.resolved }}</div><div class="stat-card-label">Resolved</div></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-lg-4">
+    <div class="stat-card dark">
+      <div class="stat-card-icon"><i class="bi bi-lock"></i></div>
+      <div><div class="stat-card-value">{{ stats.closed }}</div><div class="stat-card-label">Closed</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Recent Complaints -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-list-ul me-2"></i>Recent Complaints</span>
+        <a href="{% url 'complaints:all_complaints' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        {% if recent_complaints %}
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>#</th><th>Title</th><th>Student</th><th>Status</th><th>Date</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for c in recent_complaints %}
+            <tr>
+              <td class="text-muted">#{{ c.pk }}</td>
+              <td class="fw-semibold">{{ c.title|truncatechars:30 }}</td>
+              <td>{{ c.student.get_full_name|default:c.student.username }}</td>
+              <td><span class="badge status-badge-{{ c.status }}">{{ c.get_status_display }}</span></td>
+              <td class="text-muted small">{{ c.created_at|date:"M d" }}</td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a href="{% url 'complaints:complaint_detail' c.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                  {% if c.status == 'submitted' %}
+                  <a href="{% url 'complaints:assign_technician' c.pk %}" class="btn btn-sm btn-warning"><i class="bi bi-person-plus"></i></a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="bi bi-clipboard-x"></i></div>
+          <div class="empty-state-title">No complaints yet</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Technician Overview -->
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-people me-2"></i>Technician Overview
+      </div>
+      <div class="card-body p-0">
+        {% if technicians %}
+        {% for tech in technicians %}
+        <div class="p-3 border-bottom">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <div class="avatar-placeholder" style="width:32px;height:32px;font-size:0.75rem;background:var(--primary);">
+              {{ tech.first_name|first|upper }}{{ tech.last_name|first|upper }}
+            </div>
+            <div>
+              <div class="fw-semibold small">{{ tech.get_full_name|default:tech.username }}</div>
+              <div class="text-muted" style="font-size:0.72rem;">{{ tech.assigned_complaints.count }} tasks</div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="p-4 text-center text-muted small">No technicians registered.</div>
+        {% endif %}
+      </div>
+      <div class="card-footer text-center">
+        <a href="{% url 'accounts:user_list' %}" class="btn btn-sm btn-outline-primary">Manage Users</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

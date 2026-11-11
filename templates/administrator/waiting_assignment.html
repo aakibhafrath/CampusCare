@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Waiting for Assignment{% endblock %}
+{% block nav_waiting %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-title"><i class="bi bi-clock-history me-2 text-warning"></i>Waiting for Assignment</div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    {% if page_obj.object_list %}
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr><th>#</th><th>Title</th><th>Student</th><th>Category</th><th>Location</th><th>Submitted</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for c in page_obj %}
+        <tr>
+          <td class="text-muted">#{{ c.pk }}</td>
+          <td><a href="{% url 'complaints:complaint_detail' c.pk %}" class="text-decoration-none fw-semibold text-dark">{{ c.title }}</a></td>
+          <td>{{ c.student.get_full_name|default:c.student.username }}</td>
+          <td><span class="category-badge">{{ c.get_category_display }}</span></td>
+          <td>{{ c.location }}</td>
+          <td class="text-muted small">{{ c.created_at|date:"M d, Y H:i" }}</td>
+          <td>
+            <a href="{% url 'complaints:assign_technician' c.pk %}" class="btn btn-sm btn-warning">
+              <i class="bi bi-person-plus me-1"></i>Assign
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon"><i class="bi bi-check2-all"></i></div>
+      <div class="empty-state-title">All caught up!</div>
+      <div class="empty-state-text">No complaints are waiting for assignment.</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
